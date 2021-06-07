@@ -11,10 +11,12 @@ namespace mystl {
     template <class T>
     typename std::remove_reference<T>::type&& move(T &&arg) noexcept
     {
-        return static_cast<typename std::remove_reference<T>::type&&>(arg);
+        using ReturnType = 
+            typename std::remove_reference<T>::type&&;
+        return static_cast<ReturnType>(arg);
     }
 
-    // forward ?
+    // forward
     template <class T>
     T&& forward(typename std::remove_reference<T>::type &arg) noexcept
     {
@@ -50,6 +52,9 @@ namespace mystl {
     }
 
     // Tp(&a)[N] ?
+    /*
+        声明为引用的形参，传递数组，会推导T型别为数组型别 T (&)[N]
+     */
     template <class Tp, size_t N>
     void swap(Tp(&a)[N], Tp(&b)[N])
     {
@@ -106,7 +111,6 @@ namespace mystl {
         pair(const pair &rhs) = default;
         pair(pair &&rhs) = default;
 
-        // ? 看不懂
         // implicit constructiable for other type
         template <class Other1, class Other2,
             typename std::enable_if<
@@ -207,7 +211,7 @@ namespace mystl {
             return *this;
         }
 
-        // copy assign for other pair ?
+        // copy assign for other pair
         template <class Other1, class Other2>
         pair& operator=(pair<Other1, Other2> &&other)
         {

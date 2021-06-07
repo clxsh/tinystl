@@ -187,7 +187,7 @@ namespace mystl {
         return __move_aux(first, last, result, iterator_category(first));
     }
 
-    // trivially copy assignable 特化版本 直接复制?
+    // trivially copy assignable 特化版本
     template <class Tp, class Up>
     typename std::enable_if<
       std::is_same<typename std::remove_const<Tp>::type, Up>::value &&
