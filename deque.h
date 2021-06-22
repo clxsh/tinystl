@@ -12,6 +12,7 @@
 #include "construct.h"
 #include "uninitialized.h"
 #include "exceptdef.h"
+#include "alloc.h"
 
 namespace mystl {
     #ifdef max
@@ -201,5 +202,36 @@ namespace mystl {
         bool operator>=(const self &rhs) const { return !(*this < rhs); }
     };
 
-    
+    // 模板类 deque
+    template <class T>
+    class deque {
+    public:
+        typedef mystl::alloc                             allocator_type;
+        typedef mystl::alloc                             data_allocator;
+        typedef mystl::alloc                             map_allocator;
+
+        typedef T                                        value_type;
+        typedef T*                                       pointer;
+        typedef const T*                                 const_pointer;
+        typedef T&                                       reference;
+        typedef const T&                                 const_reference;
+        typedef size_t                                   size_type;
+        typedef ptrdiff_t                                difference_type;
+        typedef pointer*                                 map_pointer;
+        typedef const_pointer*                           const_map_pointer;
+        
+        typedef deque_iterator<T, T&, T*>               iterator;
+        typedef deque_iterator<T, const T&, const T*>   const_iterator;
+        typedef mystl::reverse_iterator<iterator>       reverse_iterator;
+        typedef mystl::reverse_iterator<const_iterator> const_reverse_iterator;
+        
+        allocator_type get_allocator() { return allocator_type(); }
+        static const size_type buffer_size = deque_buf_size<T>::value;
+        
+    private:
+        iterator       begin_;
+        iterator       end_;
+        map_pointer    map_;
+
+    };
 };
