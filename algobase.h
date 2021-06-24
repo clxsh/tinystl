@@ -65,6 +65,66 @@ namespace mystl {
     }
 
     /*****************************************************************************************/
+    // copy_backward
+    // 将 [first, last)区间内的元素拷贝到 [result - (last - first), result)内
+    /*****************************************************************************************/
+    // unchecked_copy_backward_cat 的 bidirectional_iterator_tag 版本
+    template <class BidirectionalIter1, class BidirectionalIter2>
+    BidirectionalIter2 
+    unchecked_copy_backward_cat(BidirectionalIter1 first, BidirectionalIter1 last,
+                                BidirectionalIter2 result, mystl::bidirectional_iterator_tag)
+    {
+        while (first != last)
+            *--result = *--last;
+        return result;
+    }
+
+    // unchecked_copy_backward_cat 的 random_access_iterator_tag 版本
+    template <class BidirectionalIter1, class BidirectionalIter2>
+    BidirectionalIter2 
+    unchecked_copy_backward_cat(BidirectionalIter1 first, BidirectionalIter1 last,
+                                BidirectionalIter2 result, mystl::random_access_iterator_tag)
+    {
+        for (auto n = last - first; n > 0; --n)
+            *--result = *--last;
+        return result;
+    }
+
+    template <class BidirectionalIter1, class BidirectionalIter2>
+    BidirectionalIter2 
+    unchecked_copy_backward(BidirectionalIter1 first, BidirectionalIter1 last,
+                            BidirectionalIter2 result)
+    {
+        return unchecked_copy_backward_cat(first, last, result,
+                                            iterator_category(first));
+    }
+
+    // 为 trivially_copy_assignable 类型提供特化版本
+    template <class Tp, class Up>
+    typename std::enable_if<
+    std::is_same<typename std::remove_const<Tp>::type, Up>::value &&
+    std::is_trivially_copy_assignable<Up>::value,
+    Up*>::type
+    unchecked_copy_backward(Tp* first, Tp* last, Up* result)
+    {
+        const auto n = static_cast<size_t>(last - first);
+        if (n != 0)
+        {
+            result -= n;
+            std::memmove(result, first, n * sizeof(Up));
+        }
+        return result;
+    }
+
+    //  将 [first, last)区间内的元素拷贝到 [result - (last - first), result)内
+    template <class BidirectionalIter1, class BidirectionalIter2>
+    BidirectionalIter2 
+    copy_backward(BidirectionalIter1 first, BidirectionalIter1 last, BidirectionalIter2 result)
+    {
+        return unchecked_copy_backward(first, last, result);
+    }
+
+    /*****************************************************************************************/
     // copy_n
     // 把 [first, first + n)区间上的元素拷贝到 [result, result + n)上
     // 返回一个 pair 分别指向拷贝结束的尾部
@@ -129,7 +189,7 @@ namespace mystl {
     template <class OutputIter, class Size, class T>
     OutputIter fill_n(OutputIter first, Size n, const T& value)
     {
-    return __fill_n(first, n, value);
+        return __fill_n(first, n, value);
     }
 
     /*
