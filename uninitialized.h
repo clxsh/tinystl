@@ -7,6 +7,37 @@
 #include "util.h"
 
 namespace mystl {
+    /*****************************************************************************************/
+    // copy_n
+    // 把 [first, first + n)区间上的元素拷贝到 [result, result + n)上
+    // 返回一个 pair 分别指向拷贝结束的尾部
+    /*****************************************************************************************/
+    template <class InputIter, class Size, class OutputIter>
+    mystl::pair<InputIter, OutputIter>
+    unchecked_copy_n(InputIter first, Size n, OutputIter result, mystl::input_iterator_tag)
+    {
+        for (; n > 0; --n, ++first, ++result)
+        {
+            *result = *first;
+        }
+        return mystl::pair<InputIter, OutputIter>(first, result);
+    }
+
+    template <class RandomIter, class Size, class OutputIter>
+    mystl::pair<RandomIter, OutputIter>
+    unchecked_copy_n(RandomIter first, Size n, OutputIter result, 
+                    mystl::random_access_iterator_tag)
+    {
+        auto last = first + n;
+        return mystl::pair<RandomIter, OutputIter>(last, mystl::copy(first, last, result));
+    }
+
+    template <class InputIter, class Size, class OutputIter>
+    mystl::pair<InputIter, OutputIter> 
+    copy_n(InputIter first, Size n, OutputIter result)
+    {
+        return unchecked_copy_n(first, n, result, iterator_category(first));
+    }
 
     /*
      * uninitialized_copy
@@ -50,36 +81,34 @@ namespace mystl {
      * 拷贝 [first, first + n) 上的内容复制到 result 起始的空间，返回复制结束的位置
      */
     template <class InputIter, class Size, class ForwardIter>
-    ForwardIter __uninitialized_copy(InputIter first, Size n, ForwardIter result, std::true_type)
+    ForwardIter unchecked_uninit_copy_n(InputIter first, Size n, ForwardIter result, std::true_type)
     {
-        // return mystl::copy_n(first, n, result).second;
-        return mystl::copy(first, first + n, result);
+        return mystl::copy_n(first, n, result).second;
     }
 
     template <class InputIter, class Size, class ForwardIter>
-    ForwardIter __uninitialized_copy(InputIter first, Size n, ForwardIter result, std::false_type)
+    ForwardIter unchecked_uninit_copy_n(InputIter first, Size n, ForwardIter result, std::false_type)
     {
         auto cur = result;
         try
         {
             for (; n > 0; --n, ++cur, ++first)
             {
-                mystl::construct(&*cur, *first);
+            mystl::construct(&*cur, *first);
             }
         }
         catch (...)
         {
             for (; result != cur; ++result)
-                mystl::destroy(&*result);
+            mystl::destroy(&*result);
         }
-
         return cur;
     }
 
     template <class InputIter, class Size, class ForwardIter>
     ForwardIter uninitialized_copy_n(InputIter first, Size n, ForwardIter result)
     {
-        return mystl::__uninitialized_copy_n(first, n, result,
+        return mystl::unchecked_uninit_copy_n(first, n, result,
                                              std::is_trivially_copy_assignable<
                                              typename iterator_traits<InputIter>::
                                              value_type>{});
@@ -98,7 +127,7 @@ namespace mystl {
     template <class ForwardIter, class T>
     void __uninitialized_fill(ForwardIter first, ForwardIter last, const T &value, std::false_type)
     {
-        auto cut = first;
+        auto cur = first;
         try {
             for (; cur != last; ++cur) {
                 mystl::construct(&*cur, value);
@@ -191,7 +220,7 @@ namespace mystl {
         return mystl::__uninitialized_move(first, last, result,
                                            std::is_trivially_move_assignable<
                                            typename iterator_traits<InputIter>::
-                                           value_type{});
+                                           value_type>{});
     }
 
     /*
@@ -227,7 +256,7 @@ namespace mystl {
     template <class InputIter, class Size, class ForwardIter>
     ForwardIter uninitialized_move_n(InputIter first, Size n, ForwardIter result)
     {
-        return mystl::__uninitialized_move_n(first, n, result,
+        return mystl::unchecked_uninit_move_n(first, n, result,
                                              std::is_trivially_move_assignable<
                                              typename iterator_traits<InputIter>::
                                              value_type>{});

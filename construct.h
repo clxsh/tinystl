@@ -3,6 +3,7 @@
 #include <new>
 #include "typetraits.h"
 #include "iterator.h"
+#include "util.h"
 
 /* ref: https://blog.csdn.net/lx627776548/article/details/51888789 */
 #ifdef _MSC_VER
@@ -36,7 +37,7 @@ namespace mystl {
     void destroy_one(Ty *, std::true_type) { }
 
     template <class Ty>
-    void destroy_one(Ty *, std::false_type)
+    void destroy_one(Ty * pointer, std::false_type)
     {
         if (pointer != nullptr) {
             pointer->~Ty();

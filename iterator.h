@@ -26,16 +26,17 @@ namespace mystl {
     // https://izualzhy.cn/SFINAE-and-enable_if
     template <class T>
     struct has_iterator {
-        typedef char yes[1];
-        typedef char no[2];
+        struct no { char a; char b; };
+        // typedef char yes[1];
+        // typedef char no[2];
 
         template <typename U>
-        static yes test(typename U::iterator_category* );
+        static char test(typename U::iterator_category* );
 
         template <typename>
         static no test(...);
 
-        static const bool value = sizeof(test<T>(nullptr)) == sizeof(yes);
+        static const bool value = sizeof(test<T>(nullptr)) == sizeof(char);
     };
 
     template <class Iterator, bool>
@@ -53,7 +54,7 @@ namespace mystl {
     template <class Iterator, bool>
     struct iterator_traits_helper {};
     
-    template <class Iterator, bool>
+    template <class Iterator>
     struct iterator_traits_helper<Iterator, true>
            : public iterator_traits_impl<Iterator,
              std::is_convertible<typename Iterator::iterator_category, input_iterator_tag>::value ||
@@ -227,7 +228,7 @@ namespace mystl {
 
     public:
         reverse_iterator() {}
-        explicit reverse_iterator(iterator_type i) : current(i) {}
+        explicit reverse_iterator(Iterator_type i) : current(i) {}
         reverse_iterator(const self &rhs) : current(rhs.current) {}
 
     public:
@@ -253,7 +254,7 @@ namespace mystl {
             return *this;
         }
 
-        self operator(int)
+        self operator++(int)
         {
             self tmp = *this;
             --current;

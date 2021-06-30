@@ -76,7 +76,7 @@ namespace mystl {
         second_type second;
 
         // default constructiable
-        template <class Other1 = Ty1, class Other2 = Ty2>
+        template <class Other1 = Ty1, class Other2 = Ty2,
             typename = typename std::enable_if<
             std::is_default_constructible<Other1>::value &&
             std::is_default_constructible<Other2>::value, void>::type>
@@ -92,7 +92,7 @@ namespace mystl {
             std::is_convertible<const U1&, Ty1>::value &&
             std::is_convertible<const U2&, Ty2>::value, int>::type = 0>
         constexpr pair(const Ty1 &a, const Ty2 &b)
-            : fisrt(a), second(b)
+            : first(a), second(b)
         {
         }
 
@@ -213,17 +213,17 @@ namespace mystl {
 
         // copy assign for other pair
         template <class Other1, class Other2>
-        pair& operator=(pair<Other1, Other2> &&other)
+        pair& operator=(const pair<Other1, Other2> &other)
         {
-            first = mystl::forward<Other1>(other.first);
-            first = mystl::forward<Other2>(other.second);
+            first = other.first;
+            first = other.second;
 
             return *this;
         }
 
         // move assign for other pair
         template <class Other1, class Other2>
-        pair& operator=(pair<Other1, Other2>&& other)
+        pair& operator=(pair<Other1, Other2> &&other)
         {
             first = mystl::forward<Other1>(other.first);
             second = mystl::forward<Other2>(other.second);

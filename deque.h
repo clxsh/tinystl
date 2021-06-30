@@ -81,7 +81,7 @@ namespace mystl {
 
         self& operator=(const iterator &rhs)
         {
-            if(this != rhs) {
+            if(this != &rhs) {
                 cur = rhs.cur;
                 first = rhs.first;
                 last = rhs.last;
@@ -359,7 +359,7 @@ namespace mystl {
             THROW_OUT_OF_RANGE_IF(!(n < size()), "deque<T>::at() subscript out of range");
             return (*this)[n];
         }
-        const_reference         at(size_type n)
+        const_reference         at(size_type n) const
         {
             THROW_OUT_OF_RANGE_IF(!(n < size()), "deque<T>::at() subscript out of range");
             return (*this)[n];
@@ -555,7 +555,7 @@ namespace mystl {
             --begin_.cur;
         }
         else {
-            require_capaciry(1, true);
+            require_capacity(1, true);
             try {
                 --begin_;
                 // data_allocator::construct(begin_.cur, mystl::forward<Args>(args)...);
@@ -627,7 +627,7 @@ namespace mystl {
     void deque<T>::push_back(const value_type &value)
     {
         if (end_.cur != end_.last  - 1) {
-            mystl::construct(end.cur, value);
+            mystl::construct(end_.cur, value);
             ++end_.cur;
         }
         else {
@@ -917,7 +917,7 @@ namespace mystl {
     template <class FIter>
     void deque<T>::copy_init(FIter first, FIter last, forward_iterator_tag)
     {
-        const size_type n = mystl::distance(fisrt, last);
+        const size_type n = mystl::distance(first, last);
         map_init(n);
         for (auto cur = begin_.node; cur < end_.node; ++cur) {
             auto next = first;
@@ -947,14 +947,14 @@ namespace mystl {
     {
         auto first1 = begin();
         auto last1  = end();
-        for (; fisrt != last && first1 != last1; ++first, ++first1) {
+        for (; first != last && first1 != last1; ++first, ++first1) {
             *first1 = *first;
         }
         if (first1 != last1) {
             erase(first1, last1);
         }
         else {
-            insert_dispatch(end_, fisrt, last, input_iterator_tag());
+            insert_dispatch(end_, first, last, input_iterator_tag());
         }
     }
 
@@ -1112,22 +1112,22 @@ namespace mystl {
             auto old_end = end_;
             auto new_end = end_ + n;
             const auto elems_after = len - elems_before;
-            position = end_ - elems_after;
+            pos = end_ - elems_after;
             try {
                 if (elems_after > n) {
                     auto end_n = end_ - n;
                     mystl::uninitialized_copy(end_n, end_, end_);
                     end_ = new_end;
-                    mystl::copy_backward(position, end_n, old_end);
-                    mystl::copy(first, last, position);
+                    mystl::copy_backward(pos, end_n, old_end);
+                    mystl::copy(first, last, pos);
                 }
                 else {
                     auto mid = first;
                     mystl::advance(mid, elems_after);
-                    mystl::uninitialized_copy(position, end_,
+                    mystl::uninitialized_copy(pos, end_,
                                             mystl::uninitialized_copy(mid, last, end_));
                     end_ = new_end;
-                    mystl::copy(first, mid, position);
+                    mystl::copy(first, mid, pos);
                 }
             }
             catch (...) {
